@@ -1,0 +1,134 @@
+A51 MACRO ASSEMBLER  LAB3                                                                 02/28/2013 21:22:54 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.00
+OBJECT MODULE PLACED IN lab3.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE lab3.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 00H
+0000 8059              2             JMP MAIN
+                       3     
+0003                   4             ORG 03H
+0003 8010              5             JMP STARTorSTOP
+                       6     
+000B                   7             ORG 0BH
+000B 8018              8             JMP Timer0_interrupt
+                       9     
+0013                  10             ORG 13H
+0013 8006             11             JMP Clear
+                      12     
+0015                  13     STARTorSTOP:
+0015 108C02           14             JBC TR0,STOP ;if TR0=1(Timer0 is working), jump to STOP and make TR0=0(stop Timer0)
+                              
+0018                  15     START:
+0018 D28C             16             SETB TR0         ;if TR0=0(Timer0 is not working), make TR0=1(let timer0 begin to w
+                             ork)
+001A                  17     STOP:
+001A 32               18             RETI
+                      19     
+001B                  20     Clear:
+001B 308C01           21             JNB TR0,Clear_now  ;if TR0=0(Timer0 is not working), jump to Clear_now
+001E 32               22             RETI                       ;if TR0=1(Timer0 is working), do nothing
+001F                  23     Clear_now:
+001F 7E00             24             MOV R6,#0                  ;clear R6
+0021 75A000           25             MOV P2,#0                  ;clear P2
+0024 32               26             RETI
+                      27     
+0025                  28     Timer0_interrupt:
+0025 BF002B           29             CJNE R7,#0,reload_Timer0  ;if R7 is not equal 0, jump to reload
+                      30             ;if R7=0, R6+1 and display R6
+                      31             ;first adjust if R6=99
+0028 C3               32             CLR C
+0029 EE               33             MOV A,R6
+002A 9463             34             SUBB A,#99
+002C 6017             35             JZ Clear_display        ;if R6=99,jump to Clear_display
+002E 0E               36             INC R6                                ;if R6 is not equal 99, R6+1 and display
+002F EE               37             MOV A,R6
+0030 75F00A           38             MOV B,#10
+0033 84               39             DIV AB
+0034 23               40             RL A
+0035 23               41             RL A
+0036 23               42             RL A
+0037 23               43             RL A
+0038 25F0             44             ADD A,B
+003A F5A0             45             MOV P2,A
+                      46             ;reload Timer0 and R7
+003C 758C3C           47             MOV TH0,#HIGH (65536-50000+27)
+003F 758ACB           48             MOV TL0,#LOW (65536-50000+27)
+0042 7F14             49             MOV R7,#20
+0044 32               50             RETI
+0045                  51     Clear_display:                            ;clear display
+0045 7E00             52             MOV R6,#0
+0047 75A000           53             MOV P2,#0
+                      54             ;reload Timer0 and R7
+004A 758C3C           55             MOV TH0,#HIGH (65536-50000+17)
+004D 758AC1           56             MOV TL0,#LOW (65536-50000+17)
+A51 MACRO ASSEMBLER  LAB3                                                                 02/28/2013 21:22:54 PAGE     2
+
+0050 7F14             57             MOV R7,#20
+0052 32               58             RETI
+0053                  59     reload_Timer0:                             
+0053 1F               60             DEC R7
+                      61             ;reload Timer0
+0054 758C3C           62             MOV TH0,#HIGH (65536-50000+7)
+0057 758AB7           63             MOV TL0,#LOW (65536-50000+7)
+005A 32               64             RETI
+                      65     
+                      66     
+005B                  67     MAIN:
+005B 7E00             68             MOV R6,#0
+005D 75A000           69             MOV P2,#0
+                      70             ;set INT0 and INT1
+0060 D2A8             71             SETB EX0
+0062 D288             72             SETB IT0
+0064 D2AA             73             SETB EX1
+0066 D28A             74             SETB IT1
+                      75             ;set Timer0 16 bit
+0068 5389F1           76             ANL TMOD,#11110001B
+006B 438901           77             ORL TMOD,#00000001B
+                      78             ;set Timer0 50000us
+006E 758C3C           79             MOV TH0,#HIGH (65536-50000)
+0071 758AB0           80             MOV TL0,#LOW (65536-50000)
+                      81             ;
+0074 7F14             82             MOV R7,#20
+0076 D2A9             83             SETB ET0
+0078 D2AF             84             SETB EA
+007A 80FE             85             JMP $
+                      86             END
+A51 MACRO ASSEMBLER  LAB3                                                                 02/28/2013 21:22:54 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+CLEAR. . . . . . .  C ADDR   001BH   A   
+CLEAR_DISPLAY. . .  C ADDR   0045H   A   
+CLEAR_NOW. . . . .  C ADDR   001FH   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EX0. . . . . . . .  B ADDR   00A8H.0 A   
+EX1. . . . . . . .  B ADDR   00A8H.2 A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+IT1. . . . . . . .  B ADDR   0088H.2 A   
+MAIN . . . . . . .  C ADDR   005BH   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+RELOAD_TIMER0. . .  C ADDR   0053H   A   
+START. . . . . . .  C ADDR   0018H   A   
+STARTORSTOP. . . .  C ADDR   0015H   A   
+STOP . . . . . . .  C ADDR   001AH   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TIMER0_INTERRUPT .  C ADDR   0025H   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
