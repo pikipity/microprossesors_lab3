@@ -26,42 +26,45 @@ Clear_now:
 	RETI
 
 Timer0_interrupt:
-	CJNE R7,#0,reload_Timer0  ;if R7 is not equal 0, jump to reload
+	CJNE R7,#0,reload_Timer0  ;if R7 is not equal 0, jump to reload. 2us
 	;if R7=0, R6+1 and display R6
 	;first adjust if R6=99
-	CLR C
-	MOV A,R6
-	SUBB A,#99
-	JZ Clear_display        ;if R6=99,jump to Clear_display
-	INC R6				      ;if R6 is not equal 99, R6+1 and display
-	MOV A,R6
-	MOV B,#10
-	DIV AB
-	RL A
-	RL A
-	RL A
-	RL A
-	ADD A,B
-	MOV P2,A
+	CLR C  ;1us
+	MOV A,R6  ;1us
+	SUBB A,#99  ;1us
+	JZ Clear_display        ;if R6=99,jump to Clear_display. 2us
+	INC R6				      ;if R6 is not equal 99, R6+1 and display. 1us
+	MOV A,R6    ;1us
+	MOV B,#10   ;2us
+	DIV AB      ;4us
+	RL A        ;1us
+	RL A        ;1us
+	RL A        ;1us
+	RL A        ;1us
+	ADD A,B     ;1us
+	MOV P2,A    ;1us
 	;reload Timer0 and R7
-	MOV TH0,#HIGH (65536-50000+27)
-	MOV TL0,#LOW (65536-50000+27)
-	MOV R7,#20
-	RETI
+	MOV TH0,#HIGH (65536-50000+29)  ;2us
+	MOV TL0,#LOW (65536-50000+29)   ;2us
+	MOV R7,#20                      ;2us
+	RETI                            ;2us
+	;total 29us
 Clear_display:				  ;clear display
-	MOV R6,#0
-	MOV P2,#0
+	MOV R6,#0  ;2us
+	MOV P2,#0  ;2us
 	;reload Timer0 and R7
-	MOV TH0,#HIGH (65536-50000+17)
-	MOV TL0,#LOW (65536-50000+17)
-	MOV R7,#20
-	RETI
+	MOV TH0,#HIGH (65536-50000+19)  ;2us
+	MOV TL0,#LOW (65536-50000+19)   ;2us
+	MOV R7,#20  ;2us
+	RETI  ;2us
+	;total 19us
 reload_Timer0:				   
-	DEC R7
+	DEC R7  ;1us
 	;reload Timer0
-	MOV TH0,#HIGH (65536-50000+7)
-	MOV TL0,#LOW (65536-50000+7)
-	RETI
+	MOV TH0,#HIGH (65536-50000+9)  ;2us
+	MOV TL0,#LOW (65536-50000+9)  ;2us
+	RETI  ;2us
+	;total 9us
 
 
 MAIN:
